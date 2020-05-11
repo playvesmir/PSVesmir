@@ -1,0 +1,11 @@
+PSTOPIC
+    about_PSVesmir
+
+SHORT DESCRIPTION
+    Vesmir allows you to build machine for game streaming
+
+LONG DESCRIPTION
+    Vesmir allows you to build machine for game streaming
+
+DETAILED DESCRIPTION
+    This module allows you to setup everything needed to get game streaming machine from .NET to game launcher installation.

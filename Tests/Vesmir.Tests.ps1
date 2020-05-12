@@ -5,7 +5,7 @@ if($env:APPVEYOR_REPO_BRANCH -and $env:APPVEYOR_REPO_BRANCH -notlike "master")
 }
 
 $PSVersion = $PSVersionTable.PSVersion.Major
-Import-Module $PSScriptRoot\..\Vesmir -Force
+Import-Module $PSScriptRoot\..\PSVesmir -Force
 
 #Integration test example
 Describe "Get-SEObject PS$PSVersion Integrations tests" {

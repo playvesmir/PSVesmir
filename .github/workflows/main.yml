@@ -20,12 +20,21 @@ jobs:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
 
-    # Runs a single command using the runners shell
-    - name: Run a one-line script
-      run: echo Hello, world!
+    ###Syntax analyzer to make sure there are no typos
+
+
+    ###Pester should run here for functionality tests
+
+
+    ###Once all the testing is passing - we deploy to Powershell Gallery
+
+    - name: Deploying to PSGallery
+      env:
+        POWERSHELL_GALLERY_API_KEY: ${{ secrets.POWERSHELL_GALLERY_API_KEY }}
+      run: Publish-Module -Name PSVesmir -Path "$GITHUB_WORKSPACE\PSVesmir" -NuGetApiKey "$env:POWERSHELL_GALLERY_API_KEY"
 
     # Runs a set of commands using the runners shell
-    - name: Run a multi-line script
-      run: |
-        echo Add other actions to build,
-        echo test, and deploy your project.
+    #- name: Run a multi-line script
+    #  run: |
+    #    echo Add other actions to build,
+    #    echo test, and deploy your project.

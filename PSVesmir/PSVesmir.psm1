@@ -369,7 +369,7 @@ function Install-Silver {
     
     #This is unfortunately required as autologin initializes only on reboot
     #In future there will be a separate autologin account and this won't be required
-    Restart-Computer
+    Restart-Computer -Force
 }
 
 function Show-Status {

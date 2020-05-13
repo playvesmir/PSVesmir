@@ -265,12 +265,21 @@ function Enable-WindowsAutoLogin {
         $instanceId = Invoke-RestMethod -Headers @{"X-aws-ec2-metadata-token" = $token} -Method GET -Uri http://169.254.169.254/latest/meta-data/instance-id
         Read-S3Object -BucketName demo-parsec -Key herpderp.pem -File $path\herpderp.pem
         $winPass = Get-EC2PasswordData -InstanceId $instanceId -PemFile $path\herpderp.pem
-        $autoLoginP = Start-Process "$path\Autologon.exe" -ArgumentList "/accepteula", $autoLoginUser, $env:Computername, $winPass -PassThru -Wait
-        If ($autoLoginP.ExitCode -eq 0) {
-            Write-Host "Windows AutoLogin Enabled"
-        } Else {
-            Write-Error "Enable-WindowsAutoLogin FAILED"
+        If($winPass)
+        {
+            $autoLoginP = Start-Process "$path\Autologon.exe" -ArgumentList "/accepteula", $autoLoginUser, $env:Computername, $winPass -PassThru -Wait
+            If ($autoLoginP.ExitCode -eq 0) {
+                Write-Host "Windows AutoLogin Enabled"
+            } Else {
+                Write-Error "Enable-WindowsAutoLogin FAILED"
+                throw "Enable-WindowsAutoLogin FAILED"
+            }
         }
+        else {
+            Write-Error "EC2PasswordData not available yet"
+            throw "EC2PasswordData not available yet"
+        }
+
     } -Maximum 10 -Delay 30000
 
 }

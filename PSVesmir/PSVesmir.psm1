@@ -271,17 +271,14 @@ function Enable-WindowsAutoLogin {
             If ($autoLoginP.ExitCode -eq 0) {
                 Write-Host "Windows AutoLogin Enabled"
             } Else {
-                Write-Error "Enable-WindowsAutoLogin FAILED"
                 throw "Enable-WindowsAutoLogin FAILED"
             }
         }
         else {
-            Write-Error "EC2PasswordData not available yet"
             throw "EC2PasswordData not available yet"
         }
 
-    } -Maximum 10 -Delay 30000
-
+    } -Maximum 25 -Delay 30000
 }
 
 function __Get-MachineGUID {

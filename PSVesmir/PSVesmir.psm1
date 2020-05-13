@@ -24,6 +24,41 @@ function Remove-TemporaryDirectory($path) {
     Write-Host "The royal penis is clean, your highness!"
 }
 
+function Retry-Command {
+    [CmdletBinding()]
+    Param(
+        [Parameter(Position=0, Mandatory=$true)]
+        [scriptblock]$ScriptBlock,
+
+        [Parameter(Position=1, Mandatory=$false)]
+        [int]$Maximum = 5,
+
+        [Parameter(Position=2, Mandatory=$false)]
+        [int]$Delay = 100
+    )
+
+    Begin {
+        $cnt = 0
+    }
+
+    Process {
+        do {
+            $cnt++
+            try {
+                $ScriptBlock.Invoke()
+                return
+            } catch {
+                Write-Error $_.Exception.InnerException.Message -ErrorAction Continue
+                Start-Sleep -Milliseconds $Delay
+            }
+        } while ($cnt -lt $Maximum)
+
+        # Throw an error after $Maximum unsuccessful invocations. Doesn't need
+        # a condition, since the function returns upon successful invocation.
+        throw 'Execution failed.'
+    }
+}
+
 function __Test-RegistryValue {
     # https://www.jonathanmedd.net/2014/02/testing-for-the-presence-of-a-registry-key-and-value.html
     #This specifies parameters for this function
@@ -225,16 +260,19 @@ function Enable-WindowsAutoLogin {
     (New-Object System.Net.WebClient).DownloadFile("https://download.sysinternals.com/files/AutoLogon.zip", "$path\Autologon.zip") | Unblock-File
     Expand-Archive "$path\Autologon.zip" -DestinationPath "$path" -Force
     
-    $token = Invoke-RestMethod -Headers @{"X-aws-ec2-metadata-token-ttl-seconds" = "21600"} -Method PUT -Uri http://169.254.169.254/latest/api/token
-    $instanceId = Invoke-RestMethod -Headers @{"X-aws-ec2-metadata-token" = $token} -Method GET -Uri http://169.254.169.254/latest/meta-data/instance-id
-    Read-S3Object -BucketName demo-parsec -Key herpderp.pem -File $path\herpderp.pem
-    $winPass = Get-EC2PasswordData -InstanceId $instanceId -PemFile $path\herpderp.pem
-    $autoLoginP = Start-Process "$path\Autologon.exe" -ArgumentList "/accepteula", $autoLoginUser, $env:Computername, $winPass -PassThru -Wait
-    If ($autoLoginP.ExitCode -eq 0) {
-        Write-Host "Windows AutoLogin Enabled"
-    } Else {
-        Write-Error "Enable-WindowsAutoLogin FAILED"
-    }
+    Retry-Command -ScriptBlock {
+        $token = Invoke-RestMethod -Headers @{"X-aws-ec2-metadata-token-ttl-seconds" = "21600"} -Method PUT -Uri http://169.254.169.254/latest/api/token
+        $instanceId = Invoke-RestMethod -Headers @{"X-aws-ec2-metadata-token" = $token} -Method GET -Uri http://169.254.169.254/latest/meta-data/instance-id
+        Read-S3Object -BucketName demo-parsec -Key herpderp.pem -File $path\herpderp.pem
+        $winPass = Get-EC2PasswordData -InstanceId $instanceId -PemFile $path\herpderp.pem
+        $autoLoginP = Start-Process "$path\Autologon.exe" -ArgumentList "/accepteula", $autoLoginUser, $env:Computername, $winPass -PassThru -Wait
+        If ($autoLoginP.ExitCode -eq 0) {
+            Write-Host "Windows AutoLogin Enabled"
+        } Else {
+            Write-Error "Enable-WindowsAutoLogin FAILED"
+        }
+    } -Maximum 10 -Delay 30000
+
 }
 
 function __Get-MachineGUID {

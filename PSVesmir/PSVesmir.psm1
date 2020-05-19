@@ -393,6 +393,10 @@ server_refresh_rate=60
     }
 }
 
+function Set-DesktopResolution {
+    Set-DisplayResolution -Width 1920 -Height 1080 -Force
+}
+
 function Install-Silver {
     Clear-Host
 
@@ -405,6 +409,7 @@ function Install-Silver {
     $path = New-TemporaryDirectory
     
     Enable-WindowsAutoLogin
+    Set-DesktopResolution
     Install-ParsecLoginFile
     Install-ParsecSettings
     

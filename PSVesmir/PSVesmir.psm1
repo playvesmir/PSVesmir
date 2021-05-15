@@ -167,6 +167,7 @@ function Disable-Devices {
     devcon64 /r disable "HDAUDIO\FUNC_01&VEN_10DE&DEV_0083&SUBSYS_10DE11A3*"
     Get-PnpDevice| where {$_.friendlyname -like "Generic Non-PNP Monitor" -and $_.status -eq "OK"} | Disable-PnpDevice -confirm:$false
     Get-PnpDevice| where {$_.friendlyname -like "Microsoft Basic Display Adapter" -and $_.status -eq "OK"} | Disable-PnpDevice -confirm:$false
+    Get-PnpDevice| where {$_.friendlyname -like "Microsoft Remote Display Adapter" -and $_.status -eq "OK"} | Disable-PnpDevice -confirm:$false
     devcon64 /r disable "PCI\VEN_1013&DEV_00B8*"
 }
 
